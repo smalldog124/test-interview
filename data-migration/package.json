@@ -1,0 +1,16 @@
+{
+  "name": "data-migration",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "1. design sql DB 2. handel connection mongo and sql 3. handel fail migration 4. improve performance",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.15.0",
+    "pg": "^8.14.1"
+  }
+}
