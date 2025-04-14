@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product List</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Product List</h1>
+  <div id="product-list"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</body>
+<script>
+  async function fetchProducts() {
+    try {
+      const response = await fetch("/api/v1/product");
+      const products = await response.json();
+
+      const table = document.createElement("table");
+      const headerRow = document.createElement("tr");
+      const headers = ["ID", "Name", "Price", "Stock"];
+
+      headers.forEach((headerText) => {
+        const header = document.createElement("th");
+        header.textContent = headerText;
+        headerRow.appendChild(header);
+      });
+
+      table.appendChild(headerRow);
+
+      products.forEach((product) => {
+        const row = document.createElement("tr");
+
+        const idCell = document.createElement("td");
+        idCell.textContent = product.id;
+        row.appendChild(idCell);
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = product.name;
+        row.appendChild(nameCell);
+
+        const priceCell = document.createElement("td");
+        priceCell.textContent = product.price;
+        row.appendChild(priceCell);
+
+        const quantityCell = document.createElement("td");
+        quantityCell.textContent = product.stock;
+        row.appendChild(quantityCell);
+
+        table.appendChild(row);
+      });
+
+      document.body.appendChild(table);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  }
+  fetchProducts();
+
+  const socket = new WebSocket("ws://localhost:30001");
+
+  socket.onopen = () => {
+    console.log("WebSocket connection established");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("Message from server:", event.data);
+    const data = JSON.parse(event.data);
+    if (data.action === "update_stock") {
+      const productId = data.data.id;
+      const productStock = data.data.stock;
+
+      const rows = document.querySelectorAll("table tr");
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length > 0 && cells[0].textContent == productId) {
+          cells[3].textContent = productStock;
+        }
+      });
+    }
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+
+  socket.onclose = () => {
+    console.log("WebSocket connection closed");
+  };
+</script>
